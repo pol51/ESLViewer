@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
   _btnClear     = new QPushButton("&Clear", CentralWidget);
   _btnConnect   = new QPushButton("&Connect", CentralWidget);
   _btnQuit      = new QPushButton("&Quit", CentralWidget);
-  _lblCallCount = new QLabel("0 active call", CentralWidget);
+  _lblCallCount = new QLabel("0 call / 0 channel", CentralWidget);
   _treeChannels = new QTreeWidget(CentralWidget);
 
   MainLayout->addWidget(_treeChannels);
@@ -61,10 +61,14 @@ void MainWindow::eventReceived(QSharedPointer<ESLevent> e)
   {
     case ESL_EVENT_CHANNEL_BRIDGE:    _calls++; break;
     case ESL_EVENT_CHANNEL_UNBRIDGE:  _calls--; break;
+    case ESL_EVENT_CHANNEL_CREATE:    _channels++; break;
+    case ESL_EVENT_CHANNEL_DESTROY:   _channels--; break;
     default: break;
   }
 
-  _lblCallCount->setText(QString("%1 active call%2").arg(_calls).arg(_calls>1?"s":""));
+  _lblCallCount->setText(QString("%1 call%2 / %3 channel%4")
+                         .arg(_calls).arg(_calls>1?"s":"").
+                         arg(_channels).arg(_channels>1?"s":""));
 
   if (QString(e.data()->getHeader("Unique-ID")).isEmpty())
     return;
