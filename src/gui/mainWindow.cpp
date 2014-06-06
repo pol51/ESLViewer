@@ -53,10 +53,12 @@ void MainWindow::connectToEsl()
   }
 }
 
-void MainWindow::eventReceived(QSharedPointer<ESLevent> e)
+void MainWindow::eventReceived(QSharedPointer<ESLevent> event)
 {
+  const esl_event_types_t EventType = event.data()->event->event_id;
+
   // update calls/channels count
-  switch (e.data()->event->event_id)
+  switch (EventType)
   {
     case ESL_EVENT_CHANNEL_BRIDGE:    _calls++;     updateCoutLabel(); break;
     case ESL_EVENT_CHANNEL_UNBRIDGE:  _calls--;     updateCoutLabel(); break;
@@ -66,30 +68,40 @@ void MainWindow::eventReceived(QSharedPointer<ESLevent> e)
   }
 
   // drop events without UUID
-  if (QString(e.data()->getHeader("Unique-ID")).isEmpty())
+  if (QString(event.data()->getHeader("Unique-ID")).isEmpty())
     return;
 
   // find or create the parent node for the event (call)
-  QList<QTreeWidgetItem *> ListItems = _treeChannels->findItems(e.data()->getHeader("Unique-ID"), Qt::MatchExactly, 0);
+  QList<QTreeWidgetItem *> ListItems = _treeChannels->findItems(event.data()->getHeader("Unique-ID"), Qt::MatchExactly, 0);
   QTreeWidgetItem *CurrentParent = NULL;
   if (ListItems.isEmpty())
   {
-    CurrentParent = new QTreeWidgetItem(QStringList(e.data()->getHeader("Unique-ID")));
+    CurrentParent = new QTreeWidgetItem(QStringList(event.data()->getHeader("Unique-ID")));
     _treeChannels->insertTopLevelItem(_treeChannels->topLevelItemCount(), CurrentParent);
   }
   else
     CurrentParent = ListItems.first();
 
+  // add some info on the channel
+  if (EventType == ESL_EVENT_CHANNEL_CREATE)
+  {
+    CurrentParent->setData(1, 0,
+                           QString("[%1] %2 -> %3").
+                           arg(QString(event.data()->getHeader("Caller-Direction"))).
+                           arg(QString(event.data()->getHeader("Caller-Username"))).
+                           arg(QString(event.data()->getHeader("Caller-Destination-Number"))));
+  }
+
   // insert the event in the tree
-  QTreeWidgetItem *Event = new QTreeWidgetItem(QStringList(e.data()->getType()));
+  QTreeWidgetItem *Event = new QTreeWidgetItem(QStringList(event.data()->getType()));
   CurrentParent->addChild(Event);
-  const char* Header = e.data()->firstHeader();
+  const char* Header = event.data()->firstHeader();
   do
   {
     QStringList L;
-    L << QString(Header) << e.data()->getHeader(Header);
+    L << QString(Header) << event.data()->getHeader(Header);
     Event->addChild(new QTreeWidgetItem(L));
-    Header = e.data()->nextHeader();
+    Header = event.data()->nextHeader();
   } while (Header);
 }
 

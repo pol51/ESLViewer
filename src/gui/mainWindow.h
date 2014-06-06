@@ -24,7 +24,7 @@ class MainWindow : public QMainWindow
 
   protected slots:
     void connectToEsl();
-    void eventReceived(QSharedPointer<ESLevent>);
+    void eventReceived(QSharedPointer<ESLevent> event);
     void clear();
     void updateCoutLabel();
 
