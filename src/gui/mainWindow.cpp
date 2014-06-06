@@ -6,8 +6,6 @@
 
 #include <libesl/include/esl.h>
 
-#include <QtCore/QDebug>
-
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QLabel>
@@ -57,22 +55,21 @@ void MainWindow::connectToEsl()
 
 void MainWindow::eventReceived(QSharedPointer<ESLevent> e)
 {
+  // update calls/channels count
   switch (e.data()->event->event_id)
   {
-    case ESL_EVENT_CHANNEL_BRIDGE:    _calls++; break;
-    case ESL_EVENT_CHANNEL_UNBRIDGE:  _calls--; break;
-    case ESL_EVENT_CHANNEL_CREATE:    _channels++; break;
-    case ESL_EVENT_CHANNEL_DESTROY:   _channels--; break;
+    case ESL_EVENT_CHANNEL_BRIDGE:    _calls++;     updateCoutLabel(); break;
+    case ESL_EVENT_CHANNEL_UNBRIDGE:  _calls--;     updateCoutLabel(); break;
+    case ESL_EVENT_CHANNEL_CREATE:    _channels++;  updateCoutLabel(); break;
+    case ESL_EVENT_CHANNEL_DESTROY:   _channels--;  updateCoutLabel(); break;
     default: break;
   }
 
-  _lblCallCount->setText(QString("%1 call%2 / %3 channel%4")
-                         .arg(_calls).arg(_calls>1?"s":"").
-                         arg(_channels).arg(_channels>1?"s":""));
-
+  // drop events without UUID
   if (QString(e.data()->getHeader("Unique-ID")).isEmpty())
     return;
 
+  // find or create the parent node for the event (call)
   QList<QTreeWidgetItem *> ListItems = _treeChannels->findItems(e.data()->getHeader("Unique-ID"), Qt::MatchExactly, 0);
   QTreeWidgetItem *CurrentParent = NULL;
   if (ListItems.isEmpty())
@@ -81,28 +78,29 @@ void MainWindow::eventReceived(QSharedPointer<ESLevent> e)
     _treeChannels->insertTopLevelItem(_treeChannels->topLevelItemCount(), CurrentParent);
   }
   else
-  {
-    if (ListItems.size() > 1)
-    {
-      qDebug() << "Error! We have more than one UUID on tree!!!";
-      return;
-    }
     CurrentParent = ListItems.first();
-  }
 
+  // insert the event in the tree
   QTreeWidgetItem *Event = new QTreeWidgetItem(QStringList(e.data()->getType()));
   CurrentParent->addChild(Event);
-  const char* header = e.data()->firstHeader();
+  const char* Header = e.data()->firstHeader();
   do
   {
     QStringList L;
-    L << QString(header) << e.data()->getHeader(header);
+    L << QString(Header) << e.data()->getHeader(Header);
     Event->addChild(new QTreeWidgetItem(L));
-    header = e.data()->nextHeader();
-  } while (header);
+    Header = e.data()->nextHeader();
+  } while (Header);
 }
 
 void MainWindow::clear()
 {
   _treeChannels->clear();
+}
+
+void MainWindow::updateCoutLabel()
+{
+  _lblCallCount->setText(QString("%1 call%2 / %3 channel%4").
+                         arg(_calls).arg(_calls>1?"s":"").
+                         arg(_channels).arg(_channels>1?"s":""));
 }

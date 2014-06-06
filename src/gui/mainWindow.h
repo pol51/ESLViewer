@@ -26,9 +26,9 @@ class MainWindow : public QMainWindow
     void connectToEsl();
     void eventReceived(QSharedPointer<ESLevent>);
     void clear();
+    void updateCoutLabel();
 
   protected:
-    ConnectDialog *_connectionDialog = NULL;
     int _calls    = 0;
     int _channels = 0;
 
