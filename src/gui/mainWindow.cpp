@@ -55,7 +55,8 @@ void MainWindow::connectToEsl()
 
 void MainWindow::eventReceived(QSharedPointer<ESLevent> event)
 {
-  const esl_event_types_t EventType = event.data()->event->event_id;
+  const esl_event_types_t EventType(event.data()->event->event_id);
+  const QString UUID(event.data()->getHeader("Unique-ID"));
 
   // update calls/channels count
   switch (EventType)
@@ -68,19 +69,18 @@ void MainWindow::eventReceived(QSharedPointer<ESLevent> event)
   }
 
   // drop events without UUID
-  if (QString(event.data()->getHeader("Unique-ID")).isEmpty())
-    return;
+  if (UUID.isEmpty()) return;
 
   // find or create the parent node for the event (call)
-  QList<QTreeWidgetItem *> ListItems = _treeChannels->findItems(event.data()->getHeader("Unique-ID"), Qt::MatchExactly, 0);
+  QList<QTreeWidgetItem *> ListItems = _treeChannels->findItems(UUID, Qt::MatchExactly, 0);
   QTreeWidgetItem *CurrentParent = NULL;
-  if (ListItems.isEmpty())
+  if (!ListItems.isEmpty())
+    CurrentParent = ListItems.first();
+  else
   {
-    CurrentParent = new QTreeWidgetItem(QStringList(event.data()->getHeader("Unique-ID")));
+    CurrentParent = new QTreeWidgetItem(QStringList(UUID));
     _treeChannels->insertTopLevelItem(_treeChannels->topLevelItemCount(), CurrentParent);
   }
-  else
-    CurrentParent = ListItems.first();
 
   // add some info on the channel
   switch (EventType)
@@ -89,9 +89,9 @@ void MainWindow::eventReceived(QSharedPointer<ESLevent> event)
       CurrentParent->setBackgroundColor(0, QColor(Qt::green));
       CurrentParent->setData(1, 0,
                              QString("[%1] %2 -> %3").
-                             arg(QString(event.data()->getHeader("Caller-Direction"))).
-                             arg(QString(event.data()->getHeader("Caller-Username"))).
-                             arg(QString(event.data()->getHeader("Caller-Destination-Number"))));
+                             arg(event.data()->getHeader("Caller-Direction")).
+                             arg(event.data()->getHeader("Caller-Username")).
+                             arg(event.data()->getHeader("Caller-Destination-Number")));
       break;
     case ESL_EVENT_CHANNEL_DESTROY:
       CurrentParent->setBackgroundColor(0, QColor(Qt::transparent));
