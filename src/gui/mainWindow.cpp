@@ -83,13 +83,21 @@ void MainWindow::eventReceived(QSharedPointer<ESLevent> event)
     CurrentParent = ListItems.first();
 
   // add some info on the channel
-  if (EventType == ESL_EVENT_CHANNEL_CREATE)
+  switch (EventType)
   {
-    CurrentParent->setData(1, 0,
-                           QString("[%1] %2 -> %3").
-                           arg(QString(event.data()->getHeader("Caller-Direction"))).
-                           arg(QString(event.data()->getHeader("Caller-Username"))).
-                           arg(QString(event.data()->getHeader("Caller-Destination-Number"))));
+    case ESL_EVENT_CHANNEL_CREATE:
+      CurrentParent->setBackgroundColor(0, QColor(Qt::green));
+      CurrentParent->setData(1, 0,
+                             QString("[%1] %2 -> %3").
+                             arg(QString(event.data()->getHeader("Caller-Direction"))).
+                             arg(QString(event.data()->getHeader("Caller-Username"))).
+                             arg(QString(event.data()->getHeader("Caller-Destination-Number"))));
+      break;
+    case ESL_EVENT_CHANNEL_DESTROY:
+      CurrentParent->setBackgroundColor(0, QColor(Qt::transparent));
+      break;
+    default:
+      break;
   }
 
   // insert the event in the tree
