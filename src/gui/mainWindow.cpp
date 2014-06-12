@@ -41,6 +41,8 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(_btnQuit,   &QPushButton::clicked, this, &QMainWindow::close);
   connect(_btnClear,  &QPushButton::clicked, this, &MainWindow::clear);
   connect(_btnConnect,&QPushButton::clicked, this, &MainWindow::connectToEsl);
+
+  _treeChannels->insertTopLevelItem(0, new QTreeWidgetItem(QStringList(QString("_"))));
 }
 
 void MainWindow::connectToEsl()
@@ -56,7 +58,7 @@ void MainWindow::connectToEsl()
 void MainWindow::eventReceived(QSharedPointer<ESLevent> event)
 {
   const esl_event_types_t EventType(event.data()->event->event_id);
-  const QString UUID(event.data()->getHeader("Unique-ID"));
+  QString UUID(event.data()->getHeader("Unique-ID"));
 
   // update calls/channels count
   switch (EventType)
@@ -68,8 +70,7 @@ void MainWindow::eventReceived(QSharedPointer<ESLevent> event)
     default: break;
   }
 
-  // drop events without UUID
-  if (UUID.isEmpty()) return;
+  if (UUID.isEmpty()) UUID = "_";
 
   // find or create the parent node for the event (call)
   QList<QTreeWidgetItem *> ListItems = _treeChannels->findItems(UUID, Qt::MatchExactly, 0);
