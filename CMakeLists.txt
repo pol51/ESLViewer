@@ -10,8 +10,7 @@ find_package(Qt5Gui REQUIRED)
 file(GLOB_RECURSE SRCS src/*.cpp src/*.c src/*.h *.md)
 include_directories(src src/libesl/include)
 
-file(GLOB_RECURSE IMAGES res/*)
-
+file(GLOB_RECURSE IMAGES res/*.svg)
 set(IMAGES_QRC ${CMAKE_CURRENT_BINARY_DIR}/res.qrc)
 file(WRITE ${IMAGES_QRC} "<RCC>\n    <qresource prefix=\"/\">\n")
 foreach(IMAGE_FILE ${IMAGES})
