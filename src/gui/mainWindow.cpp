@@ -6,6 +6,7 @@
 
 #include <libesl/include/esl.h>
 
+#include <QtWidgets/QApplication>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QLabel>
@@ -44,6 +45,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
   Q_INIT_RESOURCE(res);
   setWindowIcon(QIcon(":/logo.svg"));
+
+  const QStringList &AppParams(QApplication::instance()->arguments());
+  foreach (const QString &Param, AppParams)
+    if (Param == "-a")
+    {
+      ConnectDialog ConnectDBox(this);
+      QESLConnection *ESLCon = new QESLConnection(ConnectDBox.host(), ConnectDBox.port(), ConnectDBox.pass(), this);
+      connect(ESLCon, &QESLConnection::eventReceived, this, &MainWindow::eventReceived);
+    }
 
   clear();
 }
