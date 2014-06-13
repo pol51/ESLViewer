@@ -42,7 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(_btnClear,  &QPushButton::clicked, this, &MainWindow::clear);
   connect(_btnConnect,&QPushButton::clicked, this, &MainWindow::connectToEsl);
 
-  _treeChannels->insertTopLevelItem(0, new QTreeWidgetItem(QStringList(QString("_"))));
+  clear();
 }
 
 void MainWindow::connectToEsl()
@@ -117,6 +117,7 @@ void MainWindow::eventReceived(QSharedPointer<ESLevent> event)
 void MainWindow::clear()
 {
   _treeChannels->clear();
+  _treeChannels->insertTopLevelItem(0, new QTreeWidgetItem(QStringList(QString("_"))));
 }
 
 void MainWindow::updateCoutLabel()
