@@ -42,6 +42,9 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(_btnClear,  &QPushButton::clicked, this, &MainWindow::clear);
   connect(_btnConnect,&QPushButton::clicked, this, &MainWindow::connectToEsl);
 
+  Q_INIT_RESOURCE(res);
+  setWindowIcon(QIcon(":/logo.svg"));
+
   clear();
 }
 
