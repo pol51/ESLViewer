@@ -7,7 +7,7 @@
 
 #include "libesl/include/esl_oop.h"
 
-class ConnectDialog;
+class EslSettingsDialog;
 
 class QLabel;
 class QTreeWidget;
@@ -24,6 +24,7 @@ class MainWindow : public QMainWindow
 
   protected slots:
     void connectToEsl();
+    void openEslSettings();
     void eventReceived(QSharedPointer<ESLevent> event);
     void clear();
     void updateCoutLabel();
@@ -35,6 +36,7 @@ class MainWindow : public QMainWindow
     QLabel *_lblCallCount;
     QTreeWidget *_treeChannels;
     QPushButton *_btnConnect;
+    QPushButton *_btnEslSettings;
     QPushButton *_btnClear;
     QPushButton *_btnQuit;
 };

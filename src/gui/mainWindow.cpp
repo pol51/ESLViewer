@@ -1,8 +1,9 @@
 #include "mainWindow.h"
 
 #include <core/qESLConnection.h>
+#include <core/settings.h>
 
-#include <gui/connectDialog.h>
+#include <gui/eslSettingsDialog.h>
 
 #include <libesl/include/esl.h>
 
@@ -19,17 +20,19 @@ MainWindow::MainWindow(QWidget *parent) :
   QWidget *CentralWidget  = new QWidget(this);
   QVBoxLayout *MainLayout = new QVBoxLayout(CentralWidget);
   QHBoxLayout *BtnLayout  = new QHBoxLayout(CentralWidget);
-  _btnClear     = new QPushButton("&Clear", CentralWidget);
-  _btnConnect   = new QPushButton("&Connect", CentralWidget);
-  _btnQuit      = new QPushButton("&Quit", CentralWidget);
-  _lblCallCount = new QLabel("0 call / 0 channel", CentralWidget);
-  _treeChannels = new QTreeWidget(CentralWidget);
+  _btnClear       = new QPushButton("&Clear", CentralWidget);
+  _btnConnect     = new QPushButton("&Connect", CentralWidget);
+  _btnEslSettings = new QPushButton("&Settings", CentralWidget);
+  _btnQuit        = new QPushButton("&Quit", CentralWidget);
+  _lblCallCount   = new QLabel("0 call / 0 channel", CentralWidget);
+  _treeChannels   = new QTreeWidget(CentralWidget);
 
   MainLayout->addWidget(_treeChannels);
   MainLayout->addLayout(BtnLayout);
 
   BtnLayout->addWidget(_lblCallCount);
   BtnLayout->addWidget(_btnConnect);
+  BtnLayout->addWidget(_btnEslSettings);
   BtnLayout->addWidget(_btnClear);
   BtnLayout->addWidget(_btnQuit);
 
@@ -39,9 +42,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
   setCentralWidget(CentralWidget);
 
-  connect(_btnQuit,   &QPushButton::clicked, this, &QMainWindow::close);
-  connect(_btnClear,  &QPushButton::clicked, this, &MainWindow::clear);
-  connect(_btnConnect,&QPushButton::clicked, this, &MainWindow::connectToEsl);
+  connect(_btnQuit,       &QPushButton::clicked, this, &QMainWindow::close);
+  connect(_btnClear,      &QPushButton::clicked, this, &MainWindow::clear);
+  connect(_btnEslSettings,&QPushButton::clicked, this, &MainWindow::openEslSettings);
+  connect(_btnConnect,    &QPushButton::clicked, this, &MainWindow::connectToEsl);
 
   Q_INIT_RESOURCE(res);
   setWindowIcon(QIcon(":/logo.svg"));
@@ -49,23 +53,21 @@ MainWindow::MainWindow(QWidget *parent) :
   const QStringList &AppParams(QApplication::instance()->arguments());
   foreach (const QString &Param, AppParams)
     if (Param == "-a")
-    {
-      ConnectDialog ConnectDBox(this);
-      QESLConnection *ESLCon = new QESLConnection(ConnectDBox.host(), ConnectDBox.port(), ConnectDBox.pass(), this);
-      connect(ESLCon, &QESLConnection::eventReceived, this, &MainWindow::eventReceived);
-    }
+      connectToEsl();
 
   clear();
 }
 
 void MainWindow::connectToEsl()
 {
-  ConnectDialog ConnectDBox(this);
-  if (ConnectDBox.exec() == QDialog::Accepted)
-  {
-    QESLConnection *ESLCon = new QESLConnection(ConnectDBox.host(), ConnectDBox.port(), ConnectDBox.pass(), this);
-    connect(ESLCon, &QESLConnection::eventReceived, this, &MainWindow::eventReceived);
-  }
+  Settings S(this);
+  QESLConnection *ESLCon = new QESLConnection(S.hostname(), S.port(), S.password(), this);
+  connect(ESLCon, &QESLConnection::eventReceived, this, &MainWindow::eventReceived);
+}
+
+void MainWindow::openEslSettings()
+{
+  EslSettingsDialog(this).exec();
 }
 
 void MainWindow::eventReceived(QSharedPointer<ESLevent> event)

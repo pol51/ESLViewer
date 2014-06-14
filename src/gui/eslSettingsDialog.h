@@ -1,5 +1,5 @@
-#ifndef __CONNECTDIALOG_H__
-#define __CONNECTDIALOG_H__
+#ifndef __ESLSETTINGSDIALOG_H__
+#define __ESLSETTINGSDIALOG_H__
 
 #include <QtWidgets/QDialog>
 
@@ -8,16 +8,14 @@ class QSpinBox;
 class QLineEdit;
 class QDialogButtonBox;
 
-class ConnectDialog : public QDialog
+class EslSettingsDialog : public QDialog
 {
   Q_OBJECT
     
   public:
-    explicit ConnectDialog(QWidget *parent = NULL);
+    explicit EslSettingsDialog(QWidget *parent = NULL);
 
-    const QString host() const;
-    const QString pass() const;
-    const int port() const;
+    void accept();
 
   protected:
     QLineEdit         *_txtHost;
