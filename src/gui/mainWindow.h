@@ -11,7 +11,6 @@ class EslSettingsDialog;
 
 class QLabel;
 class QTreeWidget;
-class QPushButton;
 
 class MainWindow : public QMainWindow
 {
@@ -23,10 +22,10 @@ class MainWindow : public QMainWindow
     QSize sizeHint() const { return QSize(640, 480); }
 
   protected slots:
+    void clear();
     void connectToEsl();
     void openEslSettings();
     void eventReceived(QSharedPointer<ESLevent> event);
-    void clear();
     void updateCoutLabel();
 
   protected:
@@ -35,10 +34,6 @@ class MainWindow : public QMainWindow
 
     QLabel *_lblCallCount;
     QTreeWidget *_treeChannels;
-    QPushButton *_btnConnect;
-    QPushButton *_btnEslSettings;
-    QPushButton *_btnClear;
-    QPushButton *_btnQuit;
 };
 
 #endif

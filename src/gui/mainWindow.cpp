@@ -8,54 +8,67 @@
 #include <libesl/include/esl.h>
 
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QLabel>
-#include <QtWidgets/QPushButton>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTreeWidget>
+
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent)
 {
-  QWidget *CentralWidget  = new QWidget(this);
-  QVBoxLayout *MainLayout = new QVBoxLayout(CentralWidget);
-  QHBoxLayout *BtnLayout  = new QHBoxLayout(CentralWidget);
-  _btnClear       = new QPushButton("&Clear", CentralWidget);
-  _btnConnect     = new QPushButton("&Connect", CentralWidget);
-  _btnEslSettings = new QPushButton("&Settings", CentralWidget);
-  _btnQuit        = new QPushButton("&Quit", CentralWidget);
-  _lblCallCount   = new QLabel("0 call / 0 channel", CentralWidget);
-  _treeChannels   = new QTreeWidget(CentralWidget);
-
-  MainLayout->addWidget(_treeChannels);
-  MainLayout->addLayout(BtnLayout);
-
-  BtnLayout->addWidget(_lblCallCount);
-  BtnLayout->addWidget(_btnConnect);
-  BtnLayout->addWidget(_btnEslSettings);
-  BtnLayout->addWidget(_btnClear);
-  BtnLayout->addWidget(_btnQuit);
-
+  // Main UI
+  _treeChannels   = new QTreeWidget(this);
   QStringList Headers;
   Headers << "Key" << "Value";
   _treeChannels->setHeaderLabels(Headers);
+  _treeChannels->setColumnWidth(0, 270);
+  setCentralWidget(_treeChannels);
 
-  setCentralWidget(CentralWidget);
+  // Menu
+  QMenuBar *MenuBar = new QMenuBar(this);
+  QMenu *FileMenu = MenuBar->addMenu("&File");
+  QAction *ESLConnectAction = FileMenu->addAction("Co&nect to ESL");
+  QAction *ClearAction = FileMenu->addAction("&Clear");
+  FileMenu->addSeparator();
+  QAction *ESLSettingsAction = FileMenu->addAction("ESL &Settings");
+  FileMenu->addSeparator();
+  QAction *QuitAction = FileMenu->addAction("&Quit");
+  setMenuBar(MenuBar);
 
-  connect(_btnQuit,       &QPushButton::clicked, this, &QMainWindow::close);
-  connect(_btnClear,      &QPushButton::clicked, this, &MainWindow::clear);
-  connect(_btnEslSettings,&QPushButton::clicked, this, &MainWindow::openEslSettings);
-  connect(_btnConnect,    &QPushButton::clicked, this, &MainWindow::connectToEsl);
+  // StatusBar
+  QStatusBar *StatusBar = new QStatusBar(this);
+  _lblCallCount = new QLabel("0 call / 0 channel", StatusBar);
+  StatusBar->addWidget(_lblCallCount);
+  setStatusBar(StatusBar);
 
+  // Shortcuts
+  ClearAction->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_X);
+  QuitAction->setShortcut(Qt::CTRL + Qt::Key_Q);
+  ESLSettingsAction->setShortcut(Qt::CTRL + Qt::Key_S);
+  ESLConnectAction->setShortcut(Qt::CTRL + Qt::Key_C);
+
+  // Signals/Slots connections
+  connect(ESLSettingsAction,  &QAction::triggered,  this, &MainWindow::openEslSettings);
+  connect(ESLConnectAction,   &QAction::triggered,  this, &MainWindow::connectToEsl);
+  connect(QuitAction,         &QAction::triggered,  this, &QMainWindow::close);
+  connect(ClearAction,        &QAction::triggered,  this, &MainWindow::clear);
+
+  // Resources init
   Q_INIT_RESOURCE(res);
   setWindowIcon(QIcon(":/logo.svg"));
 
+  // Command-line params handling
   const QStringList &AppParams(QApplication::instance()->arguments());
   foreach (const QString &Param, AppParams)
     if (Param == "-a")
       connectToEsl();
+}
 
-  clear();
+void MainWindow::clear()
+{
+  _treeChannels->clear();
+  _calls = _channels = 0;
 }
 
 void MainWindow::connectToEsl()
@@ -95,7 +108,7 @@ void MainWindow::eventReceived(QSharedPointer<ESLevent> event)
   else
   {
     CurrentParent = new QTreeWidgetItem(QStringList(UUID));
-    _treeChannels->insertTopLevelItem(_treeChannels->topLevelItemCount(), CurrentParent);
+    _treeChannels->insertTopLevelItem(UUID != "_" ? _treeChannels->topLevelItemCount() : 0, CurrentParent);
   }
 
   // add some info on the channel
@@ -127,12 +140,6 @@ void MainWindow::eventReceived(QSharedPointer<ESLevent> event)
     Event->addChild(new QTreeWidgetItem(L));
     Header = event.data()->nextHeader();
   } while (Header);
-}
-
-void MainWindow::clear()
-{
-  _treeChannels->clear();
-  _treeChannels->insertTopLevelItem(0, new QTreeWidgetItem(QStringList(QString("_"))));
 }
 
 void MainWindow::updateCoutLabel()
