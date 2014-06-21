@@ -18,7 +18,7 @@ EslSettingsDialog::EslSettingsDialog(QWidget *parent) :
   _txtHost  = new QLineEdit(S.hostname(), this);
   _txtPass  = new QLineEdit(S.password(), this);
   _spinPort = new QSpinBox(this);
-  _btnBox   = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+  _btnBox   = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
 
   _spinPort->setRange(0, 0xffff);
   _spinPort->setValue(S.port());
