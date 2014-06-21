@@ -24,3 +24,4 @@ qt5_add_resources(RCC ${IMAGES_QRC})
 
 add_executable(${PROJECT_NAME} ${SRCS} ${IMAGES} ${RCC})
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets pthread)
+qt5_use_modules(${PROJECT_NAME} Widgets) # this should not be needed as we use cmake >= 2.8.11 but apparently it is on Linux Mint 16
