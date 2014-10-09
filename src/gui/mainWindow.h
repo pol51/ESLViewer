@@ -5,12 +5,14 @@
 
 #include <QtWidgets/QMainWindow>
 
-#include "libesl/include/esl_oop.h"
+#include <libesl/include/esl_oop.h>
+
+#include <core/model/eslEventsModel.h>
 
 class EslSettingsDialog;
 
 class QLabel;
-class QTreeWidget;
+class QTreeView;
 
 class MainWindow : public QMainWindow
 {
@@ -33,7 +35,8 @@ class MainWindow : public QMainWindow
     int _channels = 0;
 
     QLabel *_lblCallCount;
-    QTreeWidget *_treeChannels;
+    QTreeView *_treeChannels;
+    ESLEventsModel _eventsModel;
 };
 
 #endif

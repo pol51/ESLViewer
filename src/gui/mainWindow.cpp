@@ -11,18 +11,18 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QStatusBar>
-#include <QtWidgets/QTreeWidget>
-
+#include <QtWidgets/QTreeView>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent)
 {
   // Main UI
-  _treeChannels   = new QTreeWidget(this);
+  _treeChannels   = new QTreeView(this);
   QStringList Headers;
   Headers << "Key" << "Value";
-  _treeChannels->setHeaderLabels(Headers);
+  //_treeChannels->setHeaderLabels(Headers);
   _treeChannels->setColumnWidth(0, 270);
+  _treeChannels->setModel(&_eventsModel);
   setCentralWidget(_treeChannels);
 
   // Menu
@@ -67,7 +67,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::clear()
 {
-  _treeChannels->clear();
+  //_treeChannels->clear();
   _calls = _channels = 0;
 }
 
@@ -99,7 +99,7 @@ void MainWindow::eventReceived(QSharedPointer<ESLevent> event)
   }
 
   if (UUID.isEmpty()) UUID = "_";
-
+#if 0
   // find or create the parent node for the event (call)
   QList<QTreeWidgetItem *> ListItems = _treeChannels->findItems(UUID, Qt::MatchExactly, 0);
   QTreeWidgetItem *CurrentParent = NULL;
@@ -130,7 +130,7 @@ void MainWindow::eventReceived(QSharedPointer<ESLevent> event)
   }
 
   // insert the event in the tree
-  QTreeWidgetItem *Event = new QTreeWidgetItem(QStringList(event.data()->getType()));
+  //QTreeWidgetItem *Event = new QTreeWidgetItem(QStringList(event.data()->getType()));
   CurrentParent->addChild(Event);
   const char* Header = event.data()->firstHeader();
   do
@@ -140,6 +140,8 @@ void MainWindow::eventReceived(QSharedPointer<ESLevent> event)
     Event->addChild(new QTreeWidgetItem(L));
     Header = event.data()->nextHeader();
   } while (Header);
+
+#endif
 }
 
 void MainWindow::updateCoutLabel()
