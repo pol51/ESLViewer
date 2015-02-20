@@ -3,6 +3,15 @@ project(ESLViewer)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+if(APPLE)
+  if(DEFINED ENV{QTDIR})
+    set(CMAKE_PREFIX_PATH $ENV{QTDIR} ${CMAKE_PREFIX_PATH})
+  else()
+    message(FATAL_ERROR "ERROR: Environment variable QTDIR is not set. Please locate your Qt folder.")
+  endif()
+endif()
+                  
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
